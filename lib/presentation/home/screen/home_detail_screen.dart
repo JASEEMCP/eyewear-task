@@ -1,3 +1,4 @@
+import 'package:eyewear/domain/model/product_list_model/product_list_model.dart';
 import 'package:eyewear/presentation/widget/custom_text.dart';
 import 'package:eyewear/style/color.dart';
 import 'package:eyewear/utils/extension.dart';
@@ -5,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class ScreenHomeDetail extends StatelessWidget {
-  const ScreenHomeDetail({super.key});
+  const ScreenHomeDetail({super.key, required this.model});
+
+  final ProductListModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +51,7 @@ class ScreenHomeDetail extends StatelessWidget {
                     children: [
                       Gap(kToolbarHeight + 30),
                       SizedBox(
-                        height: 150,
+                        height: 180,
                         width: context.mq().width,
                         child: PageView.builder(
                           // padding: EdgeInsets.zero,
@@ -62,11 +65,12 @@ class ScreenHomeDetail extends StatelessWidget {
                           },
                         ),
                       ),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 5,
                         children: [
-                          for (int i = 0; i < 5; i++)
+                          for (int i = 0; i < 4; i++)
                             Container(
                               width: 35,
                               height: 35,
@@ -88,7 +92,7 @@ class ScreenHomeDetail extends StatelessWidget {
                             ),
                         ],
                       ),
-                      Gap(10),
+                      Gap(20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -107,10 +111,19 @@ class ScreenHomeDetail extends StatelessWidget {
                               ),
                             ],
                           ),
-                          CustomText(
-                            txt: "\$ 35",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 30,
+                          GradientText(
+                            "\$35",
+                            style: TextStyle(
+                              fontSize: 35,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            gradient: LinearGradient(
+                              stops: [0, 1],
+                              colors: [
+                                AppColor.kGreyDark,
+                                const Color.fromARGB(255, 239, 96, 44),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -136,10 +149,10 @@ class ScreenHomeDetail extends StatelessWidget {
                           children: [
                             for (int i = 0; i < 5; i++)
                               Container(
-                                padding: EdgeInsets.all(24),
+                                padding: EdgeInsets.all(28),
                                 decoration: BoxDecoration(
                                   color: AppColor.kWhite,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: Icon(Icons.gavel_sharp),
                               ),
@@ -207,39 +220,46 @@ class ScreenHomeDetail extends StatelessWidget {
           children: [
             Expanded(
               child: Container(
-                height: 65,
-                alignment: Alignment.center,
+                padding: EdgeInsets.all(2),
                 decoration: ShapeDecoration(
-                  shape: StadiumBorder(
-                    side: BorderSide(
-                      color: AppColor.kGreyDark,
-
-                      width: 2,
-                    ),
+                  shape: StadiumBorder(),
+                  gradient: LinearGradient(
+                    stops: [0, 1],
+                    colors: [
+                      AppColor.kGreyDark,
+                      const Color.fromARGB(255, 239, 96, 44),
+                    ],
                   ),
-                  color: AppColor.kGrey,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      padding: EdgeInsets.only(bottom: 15),
-                      onPressed: () {},
-                      icon: Icon(Icons.minimize),
-                    ),
-                    Center(
-                      child: CustomText(
-                        txt: "1",
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppColor.kBlack,
+                child: Container(
+                  height: 65,
+                  alignment: Alignment.center,
+                  decoration: ShapeDecoration(
+                    shape: StadiumBorder(),
+                    color: AppColor.kGrey,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.only(bottom: 15),
+                        onPressed: () {},
+                        icon: Icon(Icons.minimize),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.add),
-                    ),
-                  ],
+                      Center(
+                        child: CustomText(
+                          txt: "1",
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: AppColor.kBlack,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {},
+                        icon: Icon(Icons.add),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -290,6 +310,29 @@ class ScreenHomeDetail extends StatelessWidget {
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
+    );
+  }
+}
+
+class GradientText extends StatelessWidget {
+  const GradientText(
+    this.text, {
+    required this.gradient,
+    this.style,
+  });
+
+  final String text;
+  final TextStyle? style;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient.createShader(
+        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+      ),
+      child: Text(text, style: style),
     );
   }
 }

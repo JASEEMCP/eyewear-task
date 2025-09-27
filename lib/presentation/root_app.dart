@@ -7,7 +7,7 @@ class RootApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true,fontFamily: "Poppins"),
+      theme: ThemeData(useMaterial3: true, fontFamily: "Poppins"),
       title: "Eyewear Store",
       home: ScreenMain(),
     );

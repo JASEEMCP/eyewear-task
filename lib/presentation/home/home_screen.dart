@@ -1,13 +1,17 @@
-import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:eyewear/domain/model/product_list_model/product_list_model.dart';
+import 'package:eyewear/domain/provider/product_list_provider.dart';
 import 'package:eyewear/presentation/home/screen/home_detail_screen.dart';
 import 'package:eyewear/presentation/widget/custom_text.dart';
 import 'package:eyewear/style/color.dart';
 import 'package:eyewear/utils/extension.dart';
+import 'package:eyewear/utils/string.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-class ScreenHome extends StatelessWidget {
+class ScreenHome extends ConsumerWidget {
   ScreenHome({super.key});
 
   final List<String> categories = [
@@ -17,8 +21,21 @@ class ScreenHome extends StatelessWidget {
     "Best Seller",
   ];
 
+  final Random _random = Random();
+
+  Color getRandomColor() {
+    return Color.fromARGB(
+      255, // full opacity
+      _random.nextInt(256), // R
+      _random.nextInt(256), // G
+      _random.nextInt(256), // B
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final postsAsync = ref.watch(productListProvider);
+    final shapeListAsync = ref.watch(shapeListProvider);
     return Scaffold(
       backgroundColor: AppColor.kOrange,
       body: SingleChildScrollView(
@@ -42,7 +59,42 @@ class ScreenHome extends StatelessWidget {
 
               child: Column(
                 children: [
-                  HexagonButton(),
+                  Gap(20),
+                  shapeListAsync.maybeWhen(
+                    orElse: () => const SizedBox.shrink(),
+                    loading: () => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    error: (error, stackTrace) => Center(
+                      child: Text('Error: $error'),
+                    ),
+
+                    data: (data) => SizedBox(
+                      height: kToolbarHeight + 50,
+
+                      child: ListView.separated(
+                        padding: EdgeInsets.only(left: 20),
+                        separatorBuilder: (context, index) => Gap(25),
+                        itemCount: data.length,
+
+                        scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemBuilder: (ctx, index) => Column(
+                          spacing: 5,
+                          children: [
+                            HexagonButton(
+                              imagePath: getImageUrl(data[index].image ?? ""),
+                            ),
+                            CustomText(
+                              txt: data[index].name ?? "N/A",
+                              fontSize: 12,
+                              color: AppColor.kWhite,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   Padding(
                     padding: EdgeInsets.all(20),
                     child: Container(
@@ -102,110 +154,15 @@ class ScreenHome extends StatelessWidget {
                     ),
                   ),
                   Gap(25),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 30,
-                        child: ListView.separated(
-                          separatorBuilder: (context, index) => Gap(10),
-                          itemBuilder: (ctx, index) => ClipRRect(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: ShapeDecoration(
-                                color: AppColor.kWhite,
-                                shape: StadiumBorder(),
-                              ),
-
-                              child: CustomText(
-                                txt: categories[index],
-                                color: AppColor.kBlack,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                          itemCount: categories.length,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Gap(15),
-                  GridView.builder(
-                    itemCount: 6,
-                    shrinkWrap: true,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 0.9,
+                  postsAsync.maybeWhen(
+                    orElse: () => Container(),
+                    loading: () => Center(
+                      child: CircularProgressIndicator(),
                     ),
-                    itemBuilder: (ctx, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ScreenHomeDetail(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColor.kWhite,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Column(
-                            spacing: 5,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 100,
-                                width: context.mq().width,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: AppColor.kOrangeLight,
-                                ),
-                              ),
-                              CustomText(
-                                txt: "Urban Edge",
-                                fontWeight: FontWeight.w500,
-                              ),
-                              Gap(10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      for (int i = 0; i < 4; i++)
-                                        Padding(
-                                          padding: EdgeInsets.only(left: i * 8),
-                                          child: CircleAvatar(
-                                            radius: 8,
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  CustomText(
-                                    txt: "\$250",
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    error: (error, stackTrace) => Center(
+                      child: Text('Error: $error'),
+                    ),
+                    data: (data) => _buildProductList(context, data),
                   ),
                 ],
               ),
@@ -215,24 +172,168 @@ class ScreenHome extends StatelessWidget {
       ),
     );
   }
+
+  Column _buildProductList(BuildContext context, List<ProductListModel> data) {
+    ValueNotifier currentTab = ValueNotifier("All");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 30,
+          child: ListView.separated(
+            padding: EdgeInsets.only(left: 20),
+            separatorBuilder: (context, index) => Gap(10),
+            itemBuilder: (ctx, index) => ClipRRect(
+              child: GestureDetector(
+                onTap: () => currentTab.value = categories[index],
+                child: ValueListenableBuilder(
+                  valueListenable: currentTab,
+                  builder: (context, value, child) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: ShapeDecoration(
+                        color: value == categories[index]
+                            ? AppColor.kWhite
+                            : Colors.transparent,
+                        shape: StadiumBorder(),
+                      ),
+
+                      child: CustomText(
+                        txt: categories[index],
+                        fontWeight: value == categories[index]
+                            ? FontWeight.w500
+                            : FontWeight.w400,
+                        color: value == categories[index]
+                            ? AppColor.kBlack
+                            : Colors.white,
+                        fontSize: 14,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            itemCount: categories.length,
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+          ),
+        ),
+        Gap(15),
+        GridView.builder(
+          itemCount: data.length,
+          shrinkWrap: true,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 0.85,
+          ),
+          itemBuilder: (ctx, index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ScreenHomeDetail(
+                      model: data[index],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: AppColor.kWhite,
+                  borderRadius: BorderRadius.circular(33),
+                ),
+                child: Column(
+                  spacing: 5,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 100,
+                      width: context.mq().width,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        color: AppColor.kOrangeLight,
+                      ),
+                      child: Image.network(
+                        getImageUrl(data[index].images?[0].image.toString()),
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(Icons.image_not_supported_rounded),
+                        ),
+                        height: 20,
+                      ),
+                    ),
+                    CustomText(
+                      txt: data[index].name ?? "N/A",
+                      fontWeight: FontWeight.w500,
+                    ),
+                    Gap(10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Stack(
+                          children: [
+                            for (
+                              int i = 0;
+                              i < (data[index].colorOptions?.length ?? 0);
+                              i++
+                            )
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: i * 8,
+                                ),
+                                child: CircleAvatar(
+                                  radius: 8,
+                                  backgroundColor: getRandomColor(),
+                                ),
+                              ),
+                          ],
+                        ),
+                        CustomText(
+                          txt: "\$${data[index].price ?? "N/A"}",
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
 }
 
 class HexagonButton extends StatelessWidget {
-  const HexagonButton({super.key});
+  const HexagonButton({super.key, required this.imagePath});
+
+  final String imagePath;
 
   @override
   Widget build(BuildContext context) {
     return ClipPath(
       clipper: HexagonClipper(),
       child: Container(
-        width: 80,
+        width: 60,
         height: 80,
         color: AppColor.kWhite,
-        child: const Center(
-          child: Icon(
-            Icons.home,
+        child: Center(
+          child: Image.network(
+            imagePath,
             color: Colors.black,
-            size: 32,
+            errorBuilder: (context, error, stackTrace) =>
+                Center(child: Icon(Icons.image_not_supported_rounded)),
+            height: 32,
           ),
         ),
       ),
