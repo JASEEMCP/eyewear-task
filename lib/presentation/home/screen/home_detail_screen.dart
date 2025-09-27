@@ -336,7 +336,6 @@ class ScreenHomeDetail extends StatelessWidget {
   final ValueNotifier _itemQuantity = ValueNotifier(0);
 
   Row _buildColorSection() {
-    int currentIndex = 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 5,
