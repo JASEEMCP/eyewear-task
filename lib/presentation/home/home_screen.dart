@@ -330,9 +330,13 @@ class HexagonButton extends StatelessWidget {
         child: Center(
           child: Image.network(
             imagePath,
+            fit: BoxFit.contain,
             color: Colors.black,
-            errorBuilder: (context, error, stackTrace) =>
-                Center(child: Icon(Icons.image_not_supported_rounded)),
+            errorBuilder: (context, error, stackTrace) => Center(
+              child: Icon(
+                Icons.image_not_supported_rounded,
+              ),
+            ),
             height: 32,
           ),
         ),
@@ -360,6 +364,8 @@ class HexagonClipper extends CustomClipper<Path> {
 
     return path;
   }
+
+  
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;

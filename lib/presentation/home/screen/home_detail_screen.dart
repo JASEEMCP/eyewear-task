@@ -1,17 +1,46 @@
+import 'dart:math';
+
 import 'package:eyewear/domain/model/product_list_model/product_list_model.dart';
 import 'package:eyewear/presentation/widget/custom_text.dart';
 import 'package:eyewear/style/color.dart';
 import 'package:eyewear/utils/extension.dart';
+import 'package:eyewear/utils/string.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class ScreenHomeDetail extends StatelessWidget {
-  const ScreenHomeDetail({super.key, required this.model});
+  ScreenHomeDetail({super.key, required this.model});
 
   final ProductListModel model;
 
+  final Random _random = Random();
+
+  Color getRandomColor() {
+    return Color.fromARGB(
+      255, // full opacity
+      _random.nextInt(256), // R
+      _random.nextInt(256), // G
+      _random.nextInt(256), // B
+    );
+  }
+
+  toTitleCase(String text) {
+    if (text.isEmpty) return text;
+    return text
+        .split(' ')
+        .map(
+          (word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '',
+        )
+        .join(' ');
+  }
+
+  final ValueNotifier _currentPrice = ValueNotifier(0.0);
+
   @override
   Widget build(BuildContext context) {
+    _currentPrice.value = model.price ?? 0.0;
     return Scaffold(
       backgroundColor: AppColor.kGrey,
       body: Stack(
@@ -55,43 +84,24 @@ class ScreenHomeDetail extends StatelessWidget {
                         width: context.mq().width,
                         child: PageView.builder(
                           // padding: EdgeInsets.zero,
-                          itemCount: 3,
+                          itemCount: model.images?.length ?? 0,
                           // shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (ctx, index) {
-                            return Image.asset(
-                              'assets/image/sunglass.png',
+                            return Image.network(
+                              getImageUrl(model.images?[index].image ?? ""),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Center(
+                                    child: Icon(
+                                      Icons.image_not_supported_outlined,
+                                    ),
+                                  ),
                             );
                           },
                         ),
                       ),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 5,
-                        children: [
-                          for (int i = 0; i < 4; i++)
-                            Container(
-                              width: 35,
-                              height: 35,
-
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: AppColor.kOrange,
-                                  width: 2,
-                                ),
-                                color: AppColor.kWhite,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(3.0),
-                                child: CircleAvatar(
-                                  backgroundColor: AppColor.kOrange,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
+                      _buildColorSection(),
                       Gap(20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -100,30 +110,35 @@ class ScreenHomeDetail extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CustomText(
-                                txt: "Jade Green",
+                                txt: model.name ?? "N/A",
                                 fontWeight: FontWeight.w600,
                                 fontSize: 20,
                               ),
                               CustomText(
-                                txt: "Full Rim Wayfarer",
+                                txt: toTitleCase(model.metaTitle ?? "N/A"),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 20,
                               ),
                             ],
                           ),
-                          GradientText(
-                            "\$35",
-                            style: TextStyle(
-                              fontSize: 35,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            gradient: LinearGradient(
-                              stops: [0, 1],
-                              colors: [
-                                AppColor.kGreyDark,
-                                const Color.fromARGB(255, 239, 96, 44),
-                              ],
-                            ),
+                          ValueListenableBuilder(
+                            valueListenable: _currentPrice,
+                            builder: (context, price, child) {
+                              return GradientText(
+                                "\$$price",
+                                style: TextStyle(
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                gradient: LinearGradient(
+                                  stops: [0, 1],
+                                  colors: [
+                                    AppColor.kGreyDark,
+                                    const Color.fromARGB(255, 239, 96, 44),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -147,14 +162,28 @@ class ScreenHomeDetail extends StatelessWidget {
                         child: Row(
                           spacing: 10,
                           children: [
-                            for (int i = 0; i < 5; i++)
+                            for (
+                              int i = 0;
+                              i < (model.images?.length ?? 0);
+                              i++
+                            )
                               Container(
                                 padding: EdgeInsets.all(28),
                                 decoration: BoxDecoration(
                                   color: AppColor.kWhite,
                                   borderRadius: BorderRadius.circular(15),
                                 ),
-                                child: Icon(Icons.gavel_sharp),
+                                child: Image.network(
+                                  getImageUrl(model.images?[i].image ?? ""),
+                                  fit: BoxFit.contain,
+                                  height: 25,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Center(
+                                        child: Icon(
+                                          Icons.image_not_supported_outlined,
+                                        ),
+                                      ),
+                                ),
                               ),
                           ],
                         ),
@@ -165,8 +194,7 @@ class ScreenHomeDetail extends StatelessWidget {
                         fontSize: 22,
                       ),
                       CustomText(
-                        txt:
-                            "The eyr fdsj fjksh fdksj fsdjs dfjd fskjflsdjl;lknk dfjojsdl ",
+                        txt: model.description ?? 'N/A',
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                         color: AppColor.kGreyDark,
@@ -243,19 +271,28 @@ class ScreenHomeDetail extends StatelessWidget {
                     children: [
                       IconButton(
                         padding: EdgeInsets.only(bottom: 15),
-                        onPressed: () {},
+                        onPressed: () {
+                          _itemQuantity.value = max(0, _itemQuantity.value - 1);
+                        },
                         icon: Icon(Icons.minimize),
                       ),
-                      Center(
-                        child: CustomText(
-                          txt: "1",
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: AppColor.kBlack,
-                        ),
+                      ValueListenableBuilder(
+                        valueListenable: _itemQuantity,
+                        builder: (context, value, child) {
+                          return Center(
+                            child: CustomText(
+                              txt: "$value",
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: AppColor.kBlack,
+                            ),
+                          );
+                        },
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _itemQuantity.value = _itemQuantity.value + 1;
+                        },
                         icon: Icon(Icons.add),
                       ),
                     ],
@@ -292,6 +329,53 @@ class ScreenHomeDetail extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  final ValueNotifier _currentColorId = ValueNotifier(0);
+  final ValueNotifier _itemQuantity = ValueNotifier(0);
+
+  Row _buildColorSection() {
+    int currentIndex = 0;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 5,
+      children: [
+        for (int i = 0; i < (model.colorOptions?.length ?? 0); i++)
+          GestureDetector(
+            onTap: () {
+              _currentColorId.value = model.colorOptions?[i].optionValueId ?? 0;
+              _currentPrice.value =
+                  model.colorOptions?[i].price ?? model.price ?? 0.0;
+            },
+            child: ValueListenableBuilder(
+              valueListenable: _currentColorId,
+              builder: (context, id, child) {
+                return Container(
+                  width: 35,
+                  height: 35,
+
+                  decoration: BoxDecoration(
+                    border: id == model.colorOptions?[i].optionValueId
+                        ? Border.all(
+                            color: getRandomColor(),
+                            width: 2,
+                          )
+                        : null,
+                    color: AppColor.kWhite,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: CircleAvatar(
+                      backgroundColor: getRandomColor(),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 
