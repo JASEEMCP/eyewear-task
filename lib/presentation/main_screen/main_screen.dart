@@ -12,30 +12,89 @@ class ScreenMain extends StatelessWidget {
       body: ValueListenableBuilder(
         valueListenable: currentIndex,
         builder: (context, index, child) {
-          return IndexedStack(index: index, children: [ScreenHome()]);
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: AppColor.kOrange,
-        backgroundColor: AppColor.kWhite,
-        onTap: (value) {
-          currentIndex.value = value;
-        },
+          return Stack(
+            children: [
+              IndexedStack(
+                index: index,
+                children: [
+                  ScreenHome(),
+                ],
+              ),
 
-        type: BottomNavigationBarType.fixed,
-        unselectedItemColor: AppColor.kGreyDark,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: "Cart",
-          ),
-          BottomNavigationBarItem(
-            icon: CircleAvatar(child: Icon(Icons.person)),
-            label: "Profile",
-          ),
-        ],
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 20,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColor.kWhite,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                    border: Border.all(
+                      color: Colors.black12,
+                    ),
+                  ),
+
+                  // your background color
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          currentIndex.value = 0;
+                        },
+                        icon: Icon(
+                          Icons.home,
+                          size: 30,
+                          color: index == 0 ? AppColor.kOrange : Colors.black26,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          currentIndex.value = 1;
+                        },
+                        icon: Icon(
+                          Icons.search,
+                          size: 30,
+                          color: index == 1 ? AppColor.kOrange : Colors.black26,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          currentIndex.value = 2;
+                        },
+                        icon: Icon(
+                          Icons.shopping_cart,
+                          size: 30,
+                          color: index == 2 ? AppColor.kOrange : Colors.black26,
+                        ),
+                      ),
+                      IconButton.filled(
+                        style: TextButton.styleFrom(
+                          backgroundColor: index == 3
+                              ? AppColor.kOrangeLight
+                              : Colors.black12,
+                        ),
+                        onPressed: () {
+                          currentIndex.value = 3;
+                        },
+                        icon: Icon(
+                          Icons.person,
+                          color: index == 3 ? AppColor.kOrange : Colors.black26,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:eyewear/domain/model/product_list_model/product_list_model.dart'
 import 'package:eyewear/domain/provider/product_list_provider.dart';
 import 'package:eyewear/presentation/home/screen/home_detail_screen.dart';
 import 'package:eyewear/presentation/widget/custom_text.dart';
+import 'package:eyewear/presentation/widget/shimmer_effect.dart';
 import 'package:eyewear/style/color.dart';
 import 'package:eyewear/utils/extension.dart';
 import 'package:eyewear/utils/string.dart';
@@ -34,16 +35,17 @@ class ScreenHome extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final postsAsync = ref.watch(productListProvider);
-    final shapeListAsync = ref.watch(shapeListProvider);
+    var postsAsync = ref.watch(productListProvider);
+    var shapeListAsync = ref.watch(shapeListProvider);
+    ref.watch(filteredProductProvider);
     return Scaffold(
       backgroundColor: AppColor.kOrange,
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              height: 100,
               width: context.mq().width,
+
               decoration: BoxDecoration(
                 color: AppColor.kWhite,
                 borderRadius: const BorderRadius.only(
@@ -51,7 +53,70 @@ class ScreenHome extends ConsumerWidget {
                   topRight: Radius.circular(30),
                 ),
               ),
-              child: Column(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: 20,
+                            top: kToolbarHeight,
+                            bottom: 15,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText(
+                                txt: "Next-Gen Shades.",
+                                fontSize: 24,
+                                maxLines: 1,
+                              ),
+                              CustomText(
+                                txt: "Face-Mapped Fit.",
+                                fontSize: 26,
+                                maxLines: 1,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: kToolbarHeight + 15,
+                          decoration: BoxDecoration(
+                            color: AppColor.kOrange,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(400),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: AppColor.kWhite,
+                                radius: 23,
+                                child: Icon(
+                                  Icons.notifications_none,
+                                  color: AppColor.kBlack,
+                                  size: 20,
+                                ),
+                              ),
+                              Gap(20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
 
             SingleChildScrollView(
@@ -62,11 +127,28 @@ class ScreenHome extends ConsumerWidget {
                   Gap(20),
                   shapeListAsync.maybeWhen(
                     orElse: () => const SizedBox.shrink(),
-                    loading: () => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    error: (error, stackTrace) => Center(
-                      child: Text('Error: $error'),
+                    loading: () => _buildLoadingEffect(),
+
+                    error: (error, stackTrace) => Column(
+                      children: [
+                        CustomText(
+                          txt: "Network Error",
+                          color: AppColor.kWhite,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                           final red = ref.refresh(shapeListProvider);
+                          },
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColor.kWhite,
+                          ),
+                          child: CustomText(
+                            txt: "Try Again",
+                            color: AppColor.kBlack,
+                          ),
+                        ),
+                      ],
                     ),
 
                     data: (data) => SizedBox(
@@ -95,80 +177,293 @@ class ScreenHome extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Container(
-                      width: context.mq().width,
-                      clipBehavior: Clip.hardEdge,
 
-                      decoration: BoxDecoration(
-                        color: AppColor.kWhite,
-                        borderRadius: BorderRadius.circular(30),
+                  shapeListAsync.maybeWhen(
+                    orElse: () => const SizedBox.shrink(),
+                    loading: () => ShimmerEffect(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Container(
+                          height: 150,
+                          width: context.mq().width,
+                          clipBehavior: Clip.hardEdge,
+
+                          decoration: BoxDecoration(
+                            color: AppColor.kWhite,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+
+                    data: (data) => Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: TextField(
+                            onChanged: (value) {
+                              ref.read(searchQueryProvider.notifier).state =
+                                  value;
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: AppColor.kGrey,
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: AppColor.kGreyDark,
+                              ),
+                              hintText: "Search for your favorite shades",
+                              hintStyle: TextStyle(
+                                color: AppColor.kGreyDark,
+                                fontSize: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 0,
+                                horizontal: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Container(
+                            width: context.mq().width,
+                            clipBehavior: Clip.hardEdge,
+
+                            decoration: BoxDecoration(
+                              color: AppColor.kWhite,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Row(
                               children: [
-                                CustomText(
-                                  txt: "Scan Face with AI",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(15),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      CustomText(
+                                        txt: "Scan Face with AI",
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ),
 
-                                CustomText(
-                                  txt: "Customized sunglasses\nMade for you",
-                                  fontSize: 14,
-                                ),
-                                Gap(10),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: ShapeDecoration(
-                                    color: AppColor.kBlack,
-                                    shape: StadiumBorder(),
-                                  ),
+                                      CustomText(
+                                        txt:
+                                            "Customized sunglasses\nMade for you",
+                                        fontSize: 14,
+                                      ),
+                                      Gap(10),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 5,
+                                        ),
+                                        decoration: ShapeDecoration(
+                                          color: AppColor.kBlack,
+                                          shape: StadiumBorder(),
+                                        ),
 
-                                  child: CustomText(
-                                    txt: "Try With AI",
-                                    color: AppColor.kWhite,
-                                    fontSize: 12,
+                                        child: CustomText(
+                                          txt: "Try With AI",
+                                          color: AppColor.kWhite,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Image.asset(
+                                    "assets/image/img-bg.png",
+                                    width: 200,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Expanded(
-                            child: Image.asset(
-                              "assets/image/img-bg.png",
-                              width: 200,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   Gap(25),
                   postsAsync.maybeWhen(
                     orElse: () => Container(),
-                    loading: () => Center(
-                      child: CircularProgressIndicator(),
+                    loading: () => ShimmerEffect(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 30,
+                            child: ListView.separated(
+                              padding: EdgeInsets.only(left: 20),
+                              separatorBuilder: (context, index) => Gap(10),
+                              itemBuilder: (ctx, index) => ClipRRect(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: ShapeDecoration(
+                                    color: AppColor.kWhite,
+
+                                    shape: StadiumBorder(),
+                                  ),
+
+                                  child: CustomText(
+                                    txt: categories[index],
+
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              itemCount: categories.length,
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                            ),
+                          ),
+                          Gap(15),
+                          GridView.builder(
+                            itemCount: 5,
+                            shrinkWrap: true,
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 10,
+                                  crossAxisSpacing: 10,
+                                  childAspectRatio: 0.85,
+                                ),
+                            itemBuilder: (ctx, index) {
+                              return Container(
+                                padding: EdgeInsets.all(15),
+                                decoration: BoxDecoration(
+                                  color: AppColor.kWhite,
+                                  borderRadius: BorderRadius.circular(33),
+                                ),
+                                child: Column(
+                                  spacing: 5,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: context.mq().width,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(25),
+                                        color: AppColor.kOrangeLight,
+                                      ),
+                                    ),
+                                    CustomText(
+                                      txt: "N/A",
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    Gap(10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            for (int i = 0; i < 5; i++)
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                  left: i * 8,
+                                                ),
+                                                child: CircleAvatar(
+                                                  radius: 8,
+                                                  backgroundColor:
+                                                      getRandomColor(),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        CustomText(
+                                          txt: "\$ ffdfsdf",
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                     error: (error, stackTrace) => Center(
-                      child: Text('Error: $error'),
+                      child: Column(
+                        children: [
+                          CustomText(
+                            txt: "Network Error",
+                            color: AppColor.kWhite,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              postsAsync = ref.refresh(productListProvider);
+                              // ref.refresh(shapeListProvider);
+                            },
+
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColor.kWhite,
+                            ),
+                            child: CustomText(
+                              txt: "Try Again",
+                              color: AppColor.kBlack,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    data: (data) => _buildProductList(context, data),
+                    data: (data) {
+                      final query = ref
+                          .watch(searchQueryProvider)
+                          .toLowerCase();
+
+                      final filteredProducts = query.isEmpty
+                          ? data
+                          : data
+                                .where(
+                                  (p) => (p.name ?? "").toLowerCase().contains(
+                                    query,
+                                  ),
+                                )
+                                .toList();
+
+                      return _buildProductList(context, filteredProducts);
+                    },
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  SingleChildScrollView _buildLoadingEffect() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: NeverScrollableScrollPhysics(),
+      child: Row(
+        spacing: 20,
+        children: [
+          Gap(15),
+          for (int i = 0; i < 8; i++)
+            ShimmerEffect(
+              child: const HexagonButton(
+                imagePath: "imagePath",
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -364,8 +659,6 @@ class HexagonClipper extends CustomClipper<Path> {
 
     return path;
   }
-
-  
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;

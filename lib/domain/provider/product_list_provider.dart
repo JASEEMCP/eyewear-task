@@ -19,3 +19,21 @@ final shapeListProvider = FutureProvider<List<ShapeListModel>>((ref) async {
   final api = ref.watch(apiServiceProvider);
   return api.getShapeList();
 });
+
+final searchQueryProvider = StateProvider<String>((ref) => "");
+
+final filteredProductProvider = Provider<List<ProductListModel>>((ref) {
+  final productAsync = ref.watch(productListProvider);
+  final query = ref.watch(searchQueryProvider).toLowerCase();
+  
+  return productAsync.when(
+    data: (products) {
+      if (query.isEmpty) return products;
+      return products
+          .where((p) => (p.name ?? "").toLowerCase().contains(query))
+          .toList();
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});
