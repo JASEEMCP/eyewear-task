@@ -3,6 +3,6 @@
 
 final _baseUrl = "https://api.hanzprellet.com/storage";
 
-getImageUrl(String? imagePath) {
+String getImageUrl(String? imagePath) {
   return "$_baseUrl/$imagePath";
 }

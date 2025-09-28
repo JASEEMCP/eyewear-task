@@ -4,6 +4,7 @@ import 'package:eyewear/domain/model/product_list_model/product_list_model.dart'
 import 'package:eyewear/domain/provider/product_list_provider.dart';
 import 'package:eyewear/presentation/home/screen/home_detail_screen.dart';
 import 'package:eyewear/presentation/widget/custom_text.dart';
+import 'package:eyewear/presentation/widget/hexogon_button.dart';
 import 'package:eyewear/presentation/widget/shimmer_effect.dart';
 import 'package:eyewear/style/color.dart';
 import 'package:eyewear/utils/extension.dart';
@@ -48,10 +49,6 @@ class ScreenHome extends ConsumerWidget {
 
               decoration: BoxDecoration(
                 color: AppColor.kWhite,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,12 +59,12 @@ class ScreenHome extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
-                        flex: 2,
+                        flex: 3,
                         child: Padding(
                           padding: EdgeInsets.only(
                             left: 20,
                             top: kToolbarHeight,
-                            bottom: 15,
+                            bottom: 10,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,13 +84,14 @@ class ScreenHome extends ConsumerWidget {
                           ),
                         ),
                       ),
+
                       Expanded(
                         child: Container(
                           height: kToolbarHeight + 15,
                           decoration: BoxDecoration(
                             color: AppColor.kOrange,
                             borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(400),
+                              topLeft: Radius.circular(50),
                             ),
                           ),
                           child: Row(
@@ -137,7 +135,7 @@ class ScreenHome extends ConsumerWidget {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                           final red = ref.refresh(shapeListProvider);
+                            final red = ref.refresh(shapeListProvider);
                           },
 
                           style: ElevatedButton.styleFrom(
@@ -281,6 +279,7 @@ class ScreenHome extends ConsumerWidget {
                                   child: Image.asset(
                                     "assets/image/img-bg.png",
                                     width: 200,
+                                    height: 150,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -340,6 +339,7 @@ class ScreenHome extends ConsumerWidget {
                                   mainAxisSpacing: 10,
                                   crossAxisSpacing: 10,
                                   childAspectRatio: 0.85,
+                                  mainAxisExtent: 220,
                                 ),
                             itemBuilder: (ctx, index) {
                               return Container(
@@ -503,7 +503,7 @@ class ScreenHome extends ConsumerWidget {
                             : FontWeight.w400,
                         color: value == categories[index]
                             ? AppColor.kBlack
-                            : Colors.white,
+                            : AppColor.kWhite,
                         fontSize: 14,
                       ),
                     );
@@ -527,6 +527,7 @@ class ScreenHome extends ConsumerWidget {
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
             childAspectRatio: 0.85,
+            mainAxisExtent: 195,
           ),
           itemBuilder: (ctx, index) {
             return GestureDetector(
@@ -541,20 +542,20 @@ class ScreenHome extends ConsumerWidget {
                 );
               },
               child: Container(
-                padding: EdgeInsets.all(15),
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColor.kWhite,
-                  borderRadius: BorderRadius.circular(33),
+                  borderRadius: BorderRadius.circular(25),
                 ),
                 child: Column(
                   spacing: 5,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 100,
+                      height: 105,
                       width: context.mq().width,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(15),
                         color: AppColor.kOrangeLight,
                       ),
                       child: Image.network(
@@ -568,9 +569,9 @@ class ScreenHome extends ConsumerWidget {
                     ),
                     CustomText(
                       txt: data[index].name ?? "N/A",
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
-                    Gap(10),
+                    Gap(5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -583,18 +584,29 @@ class ScreenHome extends ConsumerWidget {
                             )
                               Padding(
                                 padding: EdgeInsets.only(
-                                  left: i * 8,
+                                  left: i * 15,
                                 ),
-                                child: CircleAvatar(
-                                  radius: 8,
-                                  backgroundColor: getRandomColor(),
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  clipBehavior: Clip.hardEdge,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                  ),
+
+                                  child: Image.network(
+                                    getImageUrl(
+                                      data[index].colorOptions?[i].optionImage,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                           ],
                         ),
                         CustomText(
                           txt: "\$${data[index].price ?? "N/A"}",
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ],
                     ),
@@ -604,177 +616,8 @@ class ScreenHome extends ConsumerWidget {
             );
           },
         ),
+        Gap(100),
       ],
     );
   }
 }
-
-class HexagonButton extends StatelessWidget {
-  const HexagonButton({super.key, required this.imagePath});
-
-  final String imagePath;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: HexagonClipper(),
-      child: Container(
-        width: 60,
-        height: 80,
-        color: AppColor.kWhite,
-        child: Center(
-          child: Image.network(
-            imagePath,
-            fit: BoxFit.contain,
-            color: Colors.black,
-            errorBuilder: (context, error, stackTrace) => Center(
-              child: Icon(
-                Icons.image_not_supported_rounded,
-              ),
-            ),
-            height: 32,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class HexagonClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    final w = size.width;
-    final h = size.height;
-
-    path.moveTo(w * 0.5, 0);
-    path.lineTo(w, h * 0.25);
-    path.lineTo(w, h * 0.65);
-    // final newX = (w * 0.5) + w * math.cos(120);
-    // final newY = 0 + w * math.sin(120);
-    path.lineTo(w * 0.5, h);
-    path.lineTo(0, h * 0.65);
-    path.lineTo(0, h * 0.25);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-// class CurvedHeader extends StatelessWidget {
-//   const CurvedHeader({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       height: 160,
-//       child: Stack(
-//         children: [
-//           // Orange curved background
-//           Align(
-//             alignment: Alignment.topRight,
-//             child: ClipPath(
-//               clipper: CurvedShapeClipper(),
-//               child: Container(
-//                 width: MediaQuery.of(context).size.width,
-//                 height: 160,
-//                 color: Colors.deepOrange,
-//               ),
-//             ),
-//           ),
-
-//           // Content (Text + Notification)
-//           Padding(
-//             padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
-//             child: Row(
-//               children: [
-//                 // Left texts
-//                 Expanded(
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: const [
-//                       Text(
-//                         "Next-Gen Shades.",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.w400,
-//                           color: Colors.black87,
-//                         ),
-//                       ),
-//                       SizedBox(height: 4),
-//                       Text(
-//                         "Face-Mapped Fit.",
-//                         style: TextStyle(
-//                           fontSize: 20,
-//                           fontWeight: FontWeight.bold,
-//                           color: Colors.black,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-
-//                 // Notification Icon inside white circle
-//                 Container(
-//                   decoration: const BoxDecoration(
-//                     color: Colors.white,
-//                     shape: BoxShape.circle,
-//                   ),
-//                   padding: const EdgeInsets.all(10),
-//                   child: Stack(
-//                     clipBehavior: Clip.none,
-//                     children: [
-//                       const Icon(
-//                         Icons.notifications_none,
-//                         color: Colors.black,
-//                         size: 22,
-//                       ),
-//                       // Red dot badge
-//                       Positioned(
-//                         top: -2,
-//                         right: -2,
-//                         child: Container(
-//                           width: 8,
-//                           height: 8,
-//                           decoration: const BoxDecoration(
-//                             color: Colors.red,
-//                             shape: BoxShape.circle,
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// // Custom clipper for orange curved shape
-// class CurvedShapeClipper extends CustomClipper<Path> {
-//   @override
-//   Path getClip(Size size) {
-//     Path path = Path();
-
-//     path.lineTo(size.width * 0.75, 0); // straight line till 75% width
-//     path.quadraticBezierTo(
-//       size.width, size.height * 0.2, // control point
-//       size.width, size.height * 0.5, // end point
-//     );
-//     path.lineTo(size.width, size.height);
-//     path.lineTo(0, size.height);
-//     path.close();
-
-//     return path;
-//   }
-
-//   @override
-//   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-// }

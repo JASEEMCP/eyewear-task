@@ -18,6 +18,9 @@ class ScreenMain extends StatelessWidget {
                 index: index,
                 children: [
                   ScreenHome(),
+                  Container(),
+                  Container(),
+                  Container(),
                 ],
               ),
 
@@ -40,62 +43,66 @@ class ScreenMain extends StatelessWidget {
                   ),
 
                   // your background color
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          currentIndex.value = 0;
-                        },
-                        icon: Icon(
-                          Icons.home,
-                          size: 30,
-                          color: index == 0 ? AppColor.kOrange : Colors.black26,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          currentIndex.value = 1;
-                        },
-                        icon: Icon(
-                          Icons.search,
-                          size: 30,
-                          color: index == 1 ? AppColor.kOrange : Colors.black26,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          currentIndex.value = 2;
-                        },
-                        icon: Icon(
-                          Icons.shopping_cart,
-                          size: 30,
-                          color: index == 2 ? AppColor.kOrange : Colors.black26,
-                        ),
-                      ),
-                      IconButton.filled(
-                        style: TextButton.styleFrom(
-                          backgroundColor: index == 3
-                              ? AppColor.kOrangeLight
-                              : Colors.black12,
-                        ),
-                        onPressed: () {
-                          currentIndex.value = 3;
-                        },
-                        icon: Icon(
-                          Icons.person,
-                          color: index == 3 ? AppColor.kOrange : Colors.black26,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _buildBottomNav(index),
                 ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  Row _buildBottomNav(int index) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          onPressed: () {
+            currentIndex.value = 0;
+          },
+          icon: Icon(
+            Icons.home,
+            size: 30,
+            color: index == 0 ? AppColor.kOrange : Colors.black26,
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            currentIndex.value = 1;
+          },
+          icon: Icon(
+            Icons.search,
+            size: 30,
+            color: index == 1 ? AppColor.kOrange : Colors.black26,
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            currentIndex.value = 2;
+          },
+          icon: Icon(
+            Icons.shopping_cart,
+            size: 30,
+            color: index == 2 ? AppColor.kOrange : Colors.black26,
+          ),
+        ),
+        IconButton.filled(
+          style: TextButton.styleFrom(
+            backgroundColor: index == 3
+                ? AppColor.kOrangeLight
+                : Colors.black12,
+          ),
+          onPressed: () {
+            currentIndex.value = 3;
+          },
+          icon: Icon(
+            Icons.person,
+            color: index == 3 ? AppColor.kOrange : Colors.black26,
+            size: 20,
+          ),
+        ),
+      ],
     );
   }
 }

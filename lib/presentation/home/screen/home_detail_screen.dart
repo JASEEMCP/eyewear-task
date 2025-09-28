@@ -7,6 +7,7 @@ import 'package:eyewear/utils/extension.dart';
 import 'package:eyewear/utils/string.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:palette_generator_master/palette_generator_master.dart';
 
 class ScreenHomeDetail extends StatelessWidget {
   ScreenHomeDetail({super.key, required this.model});
@@ -37,6 +38,14 @@ class ScreenHomeDetail extends StatelessWidget {
   }
 
   final ValueNotifier _currentPrice = ValueNotifier(0.0);
+  Future<Color> generatePalette(String imageProvider) async {
+    // Generate palette
+    final PaletteGeneratorMaster paletteGenerator =
+        await PaletteGeneratorMaster.fromImageProvider(
+          NetworkImage(imageProvider),
+        );
+    return paletteGenerator.dominantColor?.color ?? Colors.black12;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +56,14 @@ class ScreenHomeDetail extends StatelessWidget {
         children: [
           Container(
             height: 200,
+            width: context.mq().width,
             decoration: const BoxDecoration(
               color: AppColor.kWhite,
               boxShadow: [
                 BoxShadow(
                   color: AppColor.kWhite,
-                  blurRadius: 5,
-                  spreadRadius: 30,
-                  offset: Offset(0, 5),
+                  blurRadius: 30,
+                  spreadRadius: 0.5,
                 ),
               ],
             ),
@@ -168,7 +177,7 @@ class ScreenHomeDetail extends StatelessWidget {
                               i++
                             )
                               Container(
-                                padding: EdgeInsets.all(28),
+                                padding: EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   color: AppColor.kWhite,
                                   borderRadius: BorderRadius.circular(15),
@@ -269,31 +278,40 @@ class ScreenHomeDetail extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                        padding: EdgeInsets.only(bottom: 15),
-                        onPressed: () {
-                          _itemQuantity.value = max(0, _itemQuantity.value - 1);
-                        },
-                        icon: Icon(Icons.minimize),
+                      Expanded(
+                        child: IconButton(
+                          padding: EdgeInsets.only(bottom: 15),
+                          onPressed: () {
+                            _itemQuantity.value = max(
+                              0,
+                              _itemQuantity.value - 1,
+                            );
+                          },
+                          icon: Icon(Icons.minimize),
+                        ),
                       ),
-                      ValueListenableBuilder(
-                        valueListenable: _itemQuantity,
-                        builder: (context, value, child) {
-                          return Center(
-                            child: CustomText(
-                              txt: "$value",
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: AppColor.kBlack,
-                            ),
-                          );
-                        },
+                      Expanded(
+                        child: ValueListenableBuilder(
+                          valueListenable: _itemQuantity,
+                          builder: (context, value, child) {
+                            return Center(
+                              child: CustomText(
+                                txt: "$value",
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: AppColor.kBlack,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          _itemQuantity.value = _itemQuantity.value + 1;
-                        },
-                        icon: Icon(Icons.add),
+                      Expanded(
+                        child: IconButton(
+                          onPressed: () {
+                            _itemQuantity.value = _itemQuantity.value + 1;
+                          },
+                          icon: Icon(Icons.add),
+                        ),
                       ),
                     ],
                   ),
@@ -311,7 +329,7 @@ class ScreenHomeDetail extends StatelessWidget {
                     stops: [0, 1],
                     colors: [
                       AppColor.kGreyDark,
-                      const Color.fromARGB(255, 239, 96, 44),
+                      const Color.fromRGBO(230, 117, 30, 1),
                     ],
                   ),
                   // color: AppColor.kOrange,
@@ -347,29 +365,43 @@ class ScreenHomeDetail extends StatelessWidget {
               _currentPrice.value =
                   model.colorOptions?[i].price ?? model.price ?? 0.0;
             },
-            child: ValueListenableBuilder(
-              valueListenable: _currentColorId,
-              builder: (context, id, child) {
-                return Container(
-                  width: 35,
-                  height: 35,
+            child: FutureBuilder(
+              future: generatePalette(
+                getImageUrl(model.colorOptions?[i].optionImage),
+              ),
+              builder: (context, snap) {
+                return ValueListenableBuilder(
+                  valueListenable: _currentColorId,
+                  builder: (context, id, child) {
+                    return Container(
+                      width: 40,
+                      height: 40,
+                      padding: const EdgeInsets.all(3.0),
+                      decoration: BoxDecoration(
+                        border: id == model.colorOptions?[i].optionValueId
+                            ? Border.all(
+                                color: snap.hasData
+                                    ? snap.requireData
+                                    : Colors.black26,
+                                width: 3,
+                              )
+                            : null,
+                        color: AppColor.kWhite,
+                        shape: BoxShape.circle,
+                      ),
 
-                  decoration: BoxDecoration(
-                    border: id == model.colorOptions?[i].optionValueId
-                        ? Border.all(
-                            color: getRandomColor(),
-                            width: 2,
-                          )
-                        : null,
-                    color: AppColor.kWhite,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: CircleAvatar(
-                      backgroundColor: getRandomColor(),
-                    ),
-                  ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        clipBehavior: Clip.hardEdge,
+                        child: Image.network(
+                          getImageUrl(model.colorOptions?[i].optionImage),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
