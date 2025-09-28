@@ -73,6 +73,7 @@ class ScreenHomeDetail extends StatelessWidget {
               spacing: 15,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                
                 Container(
                   width: context.mq().width,
                   margin: EdgeInsets.symmetric(horizontal: 10),

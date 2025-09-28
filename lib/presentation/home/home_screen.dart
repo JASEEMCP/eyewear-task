@@ -226,6 +226,8 @@ class ScreenHome extends ConsumerWidget {
                             ),
                           ),
                         ),
+
+                        
                         Padding(
                           padding: EdgeInsets.all(20),
                           child: Container(
@@ -517,6 +519,7 @@ class ScreenHome extends ConsumerWidget {
           ),
         ),
         Gap(15),
+
         GridView.builder(
           itemCount: data.length,
           shrinkWrap: true,
