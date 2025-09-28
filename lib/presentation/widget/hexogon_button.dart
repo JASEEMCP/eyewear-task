@@ -6,12 +6,14 @@ class HexagonButton extends StatelessWidget {
     super.key,
     required this.imagePath,
     this.width,
-    this.height,
+    this.height, this.child, this.color,
   });
 
   final String imagePath;
   final double? width;
   final double? height;
+  final Widget? child;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +22,9 @@ class HexagonButton extends StatelessWidget {
       child: Container(
         width: width ?? 60,
         height: height ?? 80,
-        color: AppColor.kWhite,
+        color: color??AppColor.kWhite,
         child: Center(
-          child: Image.network(
+          child: child?? Image.network(
             imagePath,
             fit: BoxFit.contain,
             color: Colors.black,

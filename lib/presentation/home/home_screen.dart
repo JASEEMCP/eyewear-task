@@ -135,7 +135,7 @@ class ScreenHome extends ConsumerWidget {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            final red = ref.refresh(shapeListProvider);
+                            ref.refresh(shapeListProvider);
                           },
 
                           style: ElevatedButton.styleFrom(
@@ -160,7 +160,6 @@ class ScreenHome extends ConsumerWidget {
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
                         itemBuilder: (ctx, index) => Column(
-                          spacing: 5,
                           children: [
                             HexagonButton(
                               imagePath: getImageUrl(data[index].image ?? ""),
@@ -227,7 +226,6 @@ class ScreenHome extends ConsumerWidget {
                           ),
                         ),
 
-                        
                         Padding(
                           padding: EdgeInsets.all(20),
                           child: Container(

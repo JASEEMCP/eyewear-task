@@ -29,11 +29,26 @@ class ScreenMain extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _buildItem(true),
-                    _buildNormalItem(),
-                    _buildNormalItem(),
-
-                    _buildItem(false),
+                    Expanded(
+                      child: index == 0
+                          ? _buildItem(true, Icons.home)
+                          : _buildIcon(0, Icons.home_outlined, 20),
+                    ),
+                    Expanded(
+                      child: index == 1
+                          ? _buildNormalItem(Icons.search)
+                          : _buildIcon(1, Icons.search, null),
+                    ),
+                    Expanded(
+                      child: index == 2
+                          ? _buildNormalItem(Icons.shopping_cart)
+                          : _buildIcon(2, Icons.shopping_cart_outlined, null),
+                    ),
+                    Expanded(
+                      child: index == 3
+                          ? _buildItem(false, Icons.people)
+                          : _buildIcon(3, Icons.people_outline, 20),
+                    ),
                   ],
                 ),
               ),
@@ -44,7 +59,37 @@ class ScreenMain extends StatelessWidget {
     );
   }
 
-  SizedBox _buildItem(bool isLeft) {
+  GestureDetector _buildIcon(int index, IconData icon, double? radius) {
+    return GestureDetector(
+      onTap: () {
+        currentIndex.value = index;
+      },
+      child: Container(
+        height: 75,
+        width: 100,
+        padding: const EdgeInsets.symmetric(
+          // vertical: 20,
+          // horizontal: 20,
+        ),
+        decoration: BoxDecoration(
+          color: AppColor.kWhite,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(radius ?? 0),
+          ),
+        ),
+
+        // your background color
+        child: Icon(
+          icon,
+          size: 30,
+          color: index == 0 ? AppColor.kOrange : Colors.black26,
+        ),
+        //  _buildBottomNav(index),
+      ),
+    );
+  }
+
+  SizedBox _buildItem(bool isLeft, IconData icon) {
     return SizedBox(
       height: 100,
       width: 100,
@@ -56,6 +101,14 @@ class ScreenMain extends StatelessWidget {
               imagePath: "",
               width: 50,
               height: 70,
+              color: AppColor.kOrange,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Icon(
+                  icon,
+                  color: AppColor.kWhite,
+                ),
+              ),
             ),
           ),
           CustomPaint(
@@ -72,7 +125,7 @@ class ScreenMain extends StatelessWidget {
     );
   }
 
-  SizedBox _buildNormalItem() {
+  SizedBox _buildNormalItem(IconData icon) {
     return SizedBox(
       height: 100,
       width: 100,
@@ -84,6 +137,14 @@ class ScreenMain extends StatelessWidget {
               imagePath: "",
               width: 50,
               height: 70,
+              color: AppColor.kOrange,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Icon(
+                  icon,
+                  color: AppColor.kWhite,
+                ),
+              ),
             ),
           ),
           CustomPaint(
@@ -96,91 +157,5 @@ class ScreenMain extends StatelessWidget {
         ],
       ),
     );
-
-    // Align(
-    //   alignment: Alignment.bottomCenter,
-    //   child: Container(
-    //     padding: const EdgeInsets.symmetric(
-    //       vertical: 20,
-    //       horizontal: 20,
-    //     ),
-    //     decoration: BoxDecoration(
-    //       color: AppColor.kWhite,
-    //       borderRadius: const BorderRadius.only(
-    //         topLeft: Radius.circular(30),
-    //         topRight: Radius.circular(30),
-    //       ),
-    //       border: Border.all(
-    //         color: Colors.black12,
-    //       ),
-    //     ),
-
-    //     // your background color
-    //     child: Padding(
-    //       padding: const EdgeInsets.all(8.0),
-    //       child: CustomPaint(
-    //         size: const Size(
-    //           double.maxFinite,
-    //           80,
-    //         ), // adjust size
-    //         painter: SquareHexagonGapPainter(),
-    //       ),
-    //     ),
-    //     //  _buildBottomNav(index),
-    //   ),
-    // ),
-
-    Row _buildBottomNav(int index) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: () {
-              currentIndex.value = 0;
-            },
-            icon: Icon(
-              Icons.home,
-              size: 30,
-              color: index == 0 ? AppColor.kOrange : Colors.black26,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              currentIndex.value = 1;
-            },
-            icon: Icon(
-              Icons.search,
-              size: 30,
-              color: index == 1 ? AppColor.kOrange : Colors.black26,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              currentIndex.value = 2;
-            },
-            icon: Icon(
-              Icons.shopping_cart,
-              size: 30,
-              color: index == 2 ? AppColor.kOrange : Colors.black26,
-            ),
-          ),
-          IconButton.filled(
-            style: TextButton.styleFrom(
-              backgroundColor: index == 3
-                  ? AppColor.kOrangeLight
-                  : Colors.black12,
-            ),
-            onPressed: () {
-              currentIndex.value = 3;
-            },
-            icon: Icon(
-              Icons.person,
-              color: index == 3 ? AppColor.kOrange : Colors.black26,
-              size: 20,
-            ),
-          ),
-        ],
-      );
-    }
   }
 }
